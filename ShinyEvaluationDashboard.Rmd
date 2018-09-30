@@ -1,0 +1,49 @@
+---
+title: "HR Dashboard"
+output: flexdashboard::flex_dashboard
+runtime: shiny
+---
+
+
+
+```{r setup, include=FALSE}
+source("MySummaryFunction.R")
+
+HRDashboarddataset <- read_csv("HRDashboarddataset.csv", 
+        col_types = cols(Year = col_integer(), `Base Salary` = col_number(), 
+        Bonus = col_number(), Commission = col_number(), 
+        `Hire Date` = col_date(format = "%d/%m/%Y"), 
+        Overtime = col_number(), `Termination Date` = col_date(format = "%d/%m/%Y"), 
+       `Total Compensation` = col_number(), 
+        X17 = col_skip(), X18 = col_skip()))
+
+GroupbyFields <- HRDashboarddataset %>% select(Location,State, "Employment Type") %>% names()
+NumericFields <- HRDashboarddataset %>% names()
+```
+
+Inputs {.sidebar}
+-----------------------------------------------------------------
+
+```{r}
+selectInput("GroupByValue","Group by", choices = GroupbyFields,
+            multiple = T)
+selectInput("FilterBy","Filter By",choices = NumericFields,
+            selected = "name")
+textInput("FilterValue","Filter Value")
+
+```
+
+Output
+-----------------------------------------------------------------
+
+### Chart B
+
+```{r}
+renderTable({
+HRDashboarddataset %>% 
+  mySummary(FilterBy = input$FilterBy, 
+            FilterValue = input$FilterValue,
+            GroupByValue = input$GroupByValue)
+})
+```
+
